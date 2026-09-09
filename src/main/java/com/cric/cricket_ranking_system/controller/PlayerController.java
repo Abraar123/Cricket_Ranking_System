@@ -19,12 +19,13 @@ public class PlayerController {
     private PlayerService pService;
 
     @PostMapping("/add")
-    public ResponseEntity<ResponseStructure<List<String>>> addPlayers(@RequestBody ShuffleRequest r){
+    public ResponseEntity<ResponseStructure<List<String>>> addPlayers(@RequestBody ShuffleRequest r) {
         return pService.addPlayers(r);
     }
 
     @GetMapping("/shuffle")
-    public ResponseEntity<ResponseStructure<?>> generateOrder(){
+    public ResponseEntity<ResponseStructure<?>> generateOrder() {
         return pService.generateOrder();
     }
 }
+
