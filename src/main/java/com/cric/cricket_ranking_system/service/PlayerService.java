@@ -1,7 +1,9 @@
 package com.cric.cricket_ranking_system.service;
 
+import com.cric.cricket_ranking_system.dto.MatchResultRequest;
 import com.cric.cricket_ranking_system.dto.ShuffleRequest;
 import com.cric.cricket_ranking_system.dto.ShuffleResponse;
+import com.cric.cricket_ranking_system.entity.Player;
 import com.cric.cricket_ranking_system.repository.PlayerRepository;
 import com.cric.cricket_ranking_system.util.ResponseStructure;
 import org.jspecify.annotations.Nullable;
@@ -23,6 +25,8 @@ public class PlayerService {
 
     private List<String> players=new ArrayList<>();
 
+    private List<MatchResultRequest> player = new ArrayList<>();
+
     public ResponseEntity<ResponseStructure<List<String>>> addPlayers(ShuffleRequest r) {
         players.addAll(r.getPlayers());
         ResponseStructure<List<String>> rs=new ResponseStructure<>();
@@ -32,7 +36,7 @@ public class PlayerService {
         return new ResponseEntity<>(rs,HttpStatus.CREATED);
     }
 
-    public ResponseEntity<ResponseStructure<?>> generateOrder() {
+    public ResponseEntity<ResponseStructure<?>> generateRandomOrder() {
         ResponseStructure<ShuffleResponse> rs=new ResponseStructure<>();
         if(players.isEmpty()){
             rs.setStatusCode(HttpStatus.BAD_REQUEST.value());
@@ -55,5 +59,45 @@ public class PlayerService {
         rs.setMessage("Order Generated ");
         rs.setData(sr);
         return new ResponseEntity<>(rs,HttpStatus.OK);
+    }
+
+    public ResponseEntity<ResponseStructure<?>> addMatchResult(
+            List<MatchResultRequest> results){
+
+        player.addAll(results);
+
+        ResponseStructure<String> rs =
+                new ResponseStructure<>();
+
+        rs.setStatusCode(HttpStatus.OK.value());
+        rs.setMessage("Match Result Saved");
+        rs.setData("Runs and wickets added successfully");
+
+        return new ResponseEntity<>(rs,HttpStatus.OK);
+    }
+
+    public ResponseEntity<ResponseStructure<?>> generateOrder() {
+
+        player.sort((p1, p2) -> {
+
+            double score1 =
+                    p1.getRuns() +
+                            (p1.getWickets() * 0.5);
+
+            double score2 =
+                    p2.getRuns() +
+                            (p2.getWickets() * 0.5);
+
+            return Double.compare(score2, score1);
+        });
+
+        ResponseStructure<List<MatchResultRequest>> rs =
+                new ResponseStructure<>();
+
+        rs.setStatusCode(HttpStatus.OK.value());
+        rs.setMessage("Order Generated");
+        rs.setData(player);
+
+        return new ResponseEntity<>(rs, HttpStatus.OK);
     }
 }

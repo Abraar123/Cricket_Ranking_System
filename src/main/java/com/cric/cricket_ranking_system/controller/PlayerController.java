@@ -1,5 +1,6 @@
 package com.cric.cricket_ranking_system.controller;
 
+import com.cric.cricket_ranking_system.dto.MatchResultRequest;
 import com.cric.cricket_ranking_system.dto.ShuffleRequest;
 import com.cric.cricket_ranking_system.dto.ShuffleResponse;
 import com.cric.cricket_ranking_system.service.PlayerService;
@@ -24,6 +25,17 @@ public class PlayerController {
     }
 
     @GetMapping("/shuffle")
+    public ResponseEntity<ResponseStructure<?>> generateRandomOrder(){
+        return pService.generateRandomOrder();
+    }
+
+    @PostMapping("/result")
+    public ResponseEntity<ResponseStructure<?>> addMatchResult(
+            @RequestBody List<MatchResultRequest> results){
+        return pService.addMatchResult(results);
+    }
+
+    @GetMapping("/generateOrder")
     public ResponseEntity<ResponseStructure<?>> generateOrder(){
         return pService.generateOrder();
     }

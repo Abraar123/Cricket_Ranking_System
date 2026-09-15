@@ -17,4 +17,5 @@ public class Player {
     private int runs;
     private int wickets;
     private double strikeRate;
+    private int matchesPlayed;
 }
