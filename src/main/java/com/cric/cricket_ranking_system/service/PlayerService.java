@@ -86,7 +86,7 @@ public class PlayerService {
 
             double score2 =
                     p2.getRuns() +
-                            (p2.getWickets() * 0.5);
+                            (p2.getWickets() * 0.5git );
 
             return Double.compare(score2, score1);
         });
