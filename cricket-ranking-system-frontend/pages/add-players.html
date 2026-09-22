@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Players</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12181B;
+    --card: #1B2328;
+    --card-border: #29333A;
+    --accent: #E8823D;
+    --accent-dark: #4A2E17;
+    --accent-text: #F7C79A;
+    --text-primary: #F4F1EA;
+    --text-secondary: #8B9AA0;
+    --danger: #E2665C;
+    --danger-bg: #3A2222;
+    --focus-ring: rgba(232, 130, 61, 0.35);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-full: 999px;
+  }
+ 
+  * { box-sizing: border-box; }
+ 
+  body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
+}
+
+.page-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+ 
+  .module {
+    width: 100%;
+    max-width: 480px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 28px 28px 24px;
+  }
+ 
+  .module-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+ 
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+ 
+  .count-pill {
+    flex-shrink: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--card-border);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+  }
+ 
+  .count-pill strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+ 
+  .input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+ 
+  #player-input {
+    flex: 1;
+    min-width: 0;
+    background: #0F1417;
+    border: 1px solid var(--card-border);
+    color: #F4F1EA;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+ 
+  #player-input::placeholder { color: var(--text-secondary); }
+ 
+  #player-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--focus-ring);
+  }
+ 
+  #add-btn {
+    flex-shrink: 0;
+    background: var(--accent);
+    color: #29160A;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 0 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.1s ease;
+  }
+ 
+  #add-btn:hover { filter: brightness(1.08); }
+  #add-btn:active { transform: scale(0.97); }
+ 
+  .hint {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin: 0 0 18px 2px;
+  }
+ 
+  .error-msg {
+    font-size: 13px;
+    color: var(--danger);
+    background: var(--danger-bg);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    margin: 0 0 14px;
+    display: none;
+  }
+ 
+  .error-msg.visible { display: block; }
+ 
+  .roster {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 60px;
+    margin-bottom: 20px;
+  }
+ 
+  .empty-state {
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 18px 4px;
+    text-align: center;
+    border: 1px dashed var(--card-border);
+    border-radius: var(--radius-sm);
+  }
+ 
+  .player-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #171F23;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 9px 10px 9px 9px;
+    animation: rowIn 0.22s ease;
+  }
+ 
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+ 
+  .jersey {
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent-dark);
+    color: var(--accent-text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+ 
+  .player-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 14.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+ 
+  .remove-btn {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+ 
+  .remove-btn:hover {
+    background: var(--danger-bg);
+    color: var(--danger);
+  }
+ 
+.button-group {
+  display: flex;
+  gap: 12px;    
+  width: 100%;  
+}
+
+.button-group button {
+  flex: 1;       
+  background: var(--accent);
+  color: #29160A;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: filter 0.15s ease, opacity 0.15s ease, transform 0.1s ease;
+}
+
+
+.button-group button:hover:not(:disabled) { 
+  filter: brightness(1.1); 
+}
+
+.button-group button:active:not(:disabled) { 
+  transform: scale(0.99); 
+}
+
+.button-group button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+
+ 
+  .save-confirmation {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin: 10px 0 0;
+    min-height: 16px;
+  }
+ 
+  .save-confirmation.success { color: #8FCB9F; }
+</style>
+<link rel="stylesheet" href="navbar.css">
+</head>
+<body>
+<div id="navbar-container"></div>
+
+<div class="page-content">
+  <div class="module">
+    <div class="module-header">
+      <h1>Add players</h1>
+      <div class="count-pill"><strong id="count-num">0</strong> <span id="count-label">players</span></div>
+    </div>
+
+    <div class="input-row">
+      <input type="text" id="player-input" placeholder="Type a name and press Enter" autocomplete="off">
+      <button id="add-btn" type="button">Add</button>
+    </div>
+    <p class="hint">Paste a list separated by commas or new lines to add several at once.</p>
+
+    <p class="error-msg" id="error-msg"></p>
+
+    <div class="roster" id="roster">
+      <div class="empty-state" id="empty-state">No players yet. Add your first player above.</div>
+    </div>
+
+    <div class="button-group">
+      <button id="save-btn" type="button">Save Roster</button>
+      <button id="shuffle-btn" type="button">Shuffle Players</button>
+    </div>
+    <p class="save-confirmation" id="save-confirmation"></p>
+  </div>
+</div>
+
+<script src="navbar.js"></script>
+<script>
+(function () {
+  var STORAGE_KEY = 'roster_players';
+  var players = [];
+ 
+  var input = document.getElementById('player-input');
+  var addBtn = document.getElementById('add-btn');
+  var roster = document.getElementById('roster');
+  var emptyState = document.getElementById('empty-state');
+  var errorMsg = document.getElementById('error-msg');
+  var countNum = document.getElementById('count-num');
+  var countLabel = document.getElementById('count-label');
+  var saveBtn = document.getElementById('save-btn');
+  var shuffleBtn = document.getElementById('shuffle-btn');
+  var saveConfirmation = document.getElementById('save-confirmation');
+ 
+  function loadStoredPlayers() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) players = parsed;
+      }
+    } catch (e) {  }
+  }
+ 
+  function persist() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(players)); }
+    catch (e) {  }
+  }
+ 
+  function showError(text) {
+    errorMsg.textContent = text;
+    errorMsg.classList.add('visible');
+  }
+ 
+  function clearError() {
+    errorMsg.textContent = '';
+    errorMsg.classList.remove('visible');
+  }
+ 
+  function render() {
+    roster.innerHTML = '';
+ 
+    if (players.length === 0) {
+      roster.appendChild(emptyState);
+    } else {
+      players.forEach(function (name, index) {
+        var row = document.createElement('div');
+        row.className = 'player-row';
+ 
+        var jersey = document.createElement('div');
+        jersey.className = 'jersey';
+        jersey.textContent = index + 1;
+ 
+        var nameEl = document.createElement('div');
+        nameEl.className = 'player-name';
+        nameEl.textContent = name;
+ 
+        var removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-btn';
+        removeBtn.type = 'button';
+        removeBtn.setAttribute('aria-label', 'Remove ' + name);
+        removeBtn.textContent = '\u00D7';
+        removeBtn.addEventListener('click', function () {
+          players.splice(index, 1);
+          persist();
+          render();
+        });
+ 
+        row.appendChild(jersey);
+        row.appendChild(nameEl);
+        row.appendChild(removeBtn);
+        roster.appendChild(row);
+      });
+    }
+ 
+    countNum.textContent = players.length;
+    countLabel.textContent = players.length === 1 ? 'player' : 'players';
+    saveBtn.disabled = players.length === 0;
+    shuffleBtn.disabled = players.length < 2;
+  }
+ 
+  function addNames(rawText) {
+    clearError();
+    saveConfirmation.textContent = '';
+    saveConfirmation.classList.remove('success');
+ 
+    var candidates = rawText
+      .split(/[,\n]/)
+      .map(function (n) { return n.trim(); })
+      .filter(function (n) { return n.length > 0; });
+ 
+    if (candidates.length === 0) return;
+ 
+    var added = 0;
+    var skipped = [];
+ 
+    candidates.forEach(function (name) {
+      var exists = players.some(function (p) {
+        return p.toLowerCase() === name.toLowerCase();
+      });
+      if (exists) {
+        skipped.push(name);
+      } else {
+        players.push(name);
+        added++;
+      }
+    });
+ 
+    if (added > 0) {
+      persist();
+      render();
+    }
+ 
+    if (skipped.length > 0) {
+      var label = skipped.length === 1
+        ? '"' + skipped[0] + '" is already on the roster.'
+        : skipped.length + ' names were already on the roster and were skipped.';
+      showError(label);
+    }
+  }
+ 
+  addBtn.addEventListener('click', function () {
+    if (input.value.trim().length === 0) {
+      showError('Enter a name first.');
+      return;
+    }
+    addNames(input.value);
+    input.value = '';
+    input.focus();
+  });
+ 
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addBtn.click();
+    }
+  });
+ 
+  input.addEventListener('input', clearError);
+ 
+  input.addEventListener('paste', function (e) {
+    var pasted = (e.clipboardData || window.clipboardData).getData('text');
+    if (pasted && (pasted.indexOf(',') !== -1 || pasted.indexOf('\n') !== -1)) {
+      e.preventDefault();
+      addNames(pasted);
+      input.value = '';
+    }
+  });
+ 
+  saveBtn.addEventListener('click', async function () {
+
+    if (players.length === 0) return;
+
+    try {
+
+        const response = await fetch(
+            "http://localhost:8080/cric/add",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    players: players
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        saveConfirmation.textContent =
+            data.message;
+
+        saveConfirmation.classList.add('success');
+
+        localStorage.setItem(
+            "players",
+            JSON.stringify(players)
+        );
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        saveConfirmation.textContent =
+            "Failed to save players";
+
+    }
+
+});
+
+shuffleBtn.addEventListener('click', function () {
+
+  localStorage.removeItem("roster_players");
+    window.location.href =
+        "shuffle-players.html";
+
+});
+
+loadStoredPlayers(); 
+render(); 
+})(); 
+</script>
+ 
+</body>
+</html>

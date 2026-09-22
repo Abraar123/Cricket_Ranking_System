@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generate Order</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12181B;
+    --card: #1B2328;
+    --card-border: #29333A;
+    --accent: #E8823D;
+    --text-primary: #F4F1EA;
+    --text-secondary: #8B9AA0;
+    --danger: #E2665C;
+    --danger-bg: #3A2222;
+    --gold: #F0C24B;
+    --gold-bg: #3B3218;
+    --silver: #C7CDD1;
+    --silver-bg: #2A3033;
+    --bronze: #D98A55;
+    --bronze-bg: #3A2A1C;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+ body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
+}
+
+.page-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+  .module {
+    width: 100%;
+    max-width: 560px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 28px 28px 24px;
+  }
+
+  h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 20px;
+    line-height: 1.5;
+  }
+
+  #generate-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #29160A;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: filter 0.15s ease, transform 0.1s ease;
+  }
+
+  #generate-btn:hover:not(:disabled) { filter: brightness(1.08); }
+  #generate-btn:active:not(:disabled) { transform: scale(0.98); }
+  #generate-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .trophy { display: inline-block; }
+  #generate-btn.spinning .trophy { animation: pulse 0.7s ease-in-out infinite; }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+  }
+
+  .error-msg {
+    font-size: 13px;
+    color: var(--danger);
+    background: var(--danger-bg);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    margin: 14px 0 0;
+    display: none;
+  }
+
+  .error-msg.visible { display: block; }
+
+  .empty-state {
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 22px 4px;
+    text-align: center;
+    border: 1px dashed var(--card-border);
+    border-radius: var(--radius-sm);
+    margin-top: 20px;
+  }
+
+  #ranking {
+    background-color: var(--card);
+    list-style: none;
+    margin: 22px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rank-row {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    background: #171F23;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    opacity: 0;
+    transform: translateX(-8px);
+    animation: slideIn 0.35s ease forwards;
+  }
+
+  @keyframes slideIn {
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .rank-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-secondary);
+    border: 1px solid var(--card-border);
+  }
+
+  .rank-row.top-1 { border-color: var(--gold); background: linear-gradient(90deg, var(--gold-bg), #171F23 65%); }
+  .rank-row.top-1 .rank-badge { background: var(--gold-bg); color: var(--gold); border-color: var(--gold); }
+
+  .rank-row.top-2 { border-color: var(--silver); background: linear-gradient(90deg, var(--silver-bg), #171F23 65%); }
+  .rank-row.top-2 .rank-badge { background: var(--silver-bg); color: var(--silver); border-color: var(--silver); }
+
+  .rank-row.top-3 { border-color: var(--bronze); background: linear-gradient(90deg, var(--bronze-bg), #171F23 65%); }
+  .rank-row.top-3 .rank-badge { background: var(--bronze-bg); color: var(--bronze); border-color: var(--bronze); }
+
+  .player-info { min-width: 0; }
+
+  .player-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .runs-bar-track {
+    width: 100%;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.06);
+    overflow: hidden;
+  }
+
+  .runs-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.6s ease;
+  }
+
+  .top-1 .runs-bar-fill { background: var(--gold); }
+  .top-2 .runs-bar-fill { background: var(--silver); }
+  .top-3 .runs-bar-fill { background: var(--bronze); }
+
+  .stat-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .stat-runs {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .stat-runs span {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-left: 3px;
+  }
+
+  .stat-wickets {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.05);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  
+#start-next-match-btn {
+  width: 100%;   
+  background: var(--accent);
+  color: #29160A;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px;
+  margin-top: 20px; 
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+#start-next-match-btn:hover:not(:disabled) { 
+  filter: brightness(1.08); 
+}
+
+#start-next-match-btn:active:not(:disabled) { 
+  transform: scale(0.98); 
+}
+
+#start-next-match-btn:disabled { 
+  opacity: 0.5; 
+  cursor: not-allowed; 
+}
+
+#start-next-match-btn {
+  display: none; 
+}
+
+
+</style>
+<link rel="stylesheet" href="navbar.css">
+</head>
+<body>
+<div id="navbar-container"></div>
+<div class="page-content">
+  <div class="module">
+    <h2>Match ranking</h2>
+    <p class="subtitle">Ranked by performance &mdash; runs and wickets for this match.</p>
+
+    <button id="generate-btn" type="button" onclick="generateOrder()">
+      <span class="trophy">🏆</span>
+      <span id="generate-btn-label">Generate ranking</span>
+    </button>
+
+    <p class="error-msg" id="error-msg"></p>
+
+    <ol id="ranking"></ol>
+
+ <button id="start-next-match-btn" type="button" onclick="window.location.href='match-results.html'">Start Next Match</button>
+  </div>
+</div>
+<script src="navbar.js"></script>
+<script>
+  function showError(text) {
+    var errorMsg = document.getElementById('error-msg');
+    errorMsg.textContent = text;
+    errorMsg.classList.add('visible');
+  }
+
+  function clearError() {
+    var errorMsg = document.getElementById('error-msg');
+    errorMsg.textContent = '';
+    errorMsg.classList.remove('visible');
+  }
+
+  function rankBadgeContent(rank) {
+    if (rank === 1) return '\u{1F947}';
+    if (rank === 2) return '\u{1F948}';
+    if (rank === 3) return '\u{1F949}';
+    return rank;
+  }
+
+  function renderRanking(players) {
+    var ranking = document.getElementById('ranking');
+    ranking.innerHTML = '';
+
+    if (!players || players.length === 0) {
+      var empty = document.createElement('li');
+      empty.className = 'empty-state';
+      empty.textContent = 'No results yet. Save match results first.';
+      ranking.appendChild(empty);
+      return;
+    }
+
+    var maxRuns = Math.max.apply(null, players.map(function (p) { return p.runs || 0; }));
+
+    players.forEach(function (player, index) {
+      var rank = index + 1;
+
+      var row = document.createElement('li');
+      row.className = 'rank-row' + (rank <= 3 ? ' top-' + rank : '');
+      row.style.animationDelay = (index * 0.06) + 's';
+
+      var badge = document.createElement('div');
+      badge.className = 'rank-badge';
+      badge.textContent = rankBadgeContent(rank);
+
+      var info = document.createElement('div');
+      info.className = 'player-info';
+
+      var name = document.createElement('div');
+      name.className = 'player-name';
+      name.textContent = player.name;
+
+      var barTrack = document.createElement('div');
+      barTrack.className = 'runs-bar-track';
+      var barFill = document.createElement('div');
+      barFill.className = 'runs-bar-fill';
+
+      info.appendChild(name);
+      barTrack.appendChild(barFill);
+      info.appendChild(barTrack);
+
+      var statGroup = document.createElement('div');
+      statGroup.className = 'stat-group';
+
+      var statRuns = document.createElement('div');
+      statRuns.className = 'stat-runs';
+      statRuns.innerHTML = (player.runs != null ? player.runs : 0) + '<span>runs</span>';
+
+      var statWickets = document.createElement('div');
+      statWickets.className = 'stat-wickets';
+      statWickets.textContent = (player.wickets != null ? player.wickets : 0) + ' wkts';
+
+      statGroup.appendChild(statRuns);
+      statGroup.appendChild(statWickets);
+
+      row.appendChild(badge);
+      row.appendChild(info);
+      row.appendChild(statGroup);
+      ranking.appendChild(row);
+
+      var pct = maxRuns > 0 ? Math.max(6, Math.round(((player.runs || 0) / maxRuns) * 100)) : 0;
+      setTimeout(function () {
+        barFill.style.width = pct + '%';
+      }, index * 60 + 200);
+    });
+  }
+
+  async function generateOrder() {
+    clearError();
+    document.getElementById("start-next-match-btn").style.display = "inline-block";
+
+    var btn = document.getElementById('generate-btn');
+    var label = document.getElementById('generate-btn-label');
+    btn.disabled = true;
+    btn.classList.add('spinning');
+    label.textContent = 'Ranking...';
+
+    try {
+      const response = await fetch("http://localhost:8080/cric/generateOrder");
+
+      if (!response.ok) {
+        throw new Error('Server returned ' + response.status);
+      }
+
+      const data = await response.json();
+      const players = data.data;
+
+      renderRanking(players);
+    } catch (err) {
+      document.getElementById('ranking').innerHTML = '';
+      showError('Could not generate the ranking. Check the connection and try again.');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('spinning');
+      label.textContent = 'Generate ranking';
+    }
+  }
+</script>
+
+</body>
+</html>

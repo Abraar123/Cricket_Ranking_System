@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/cric")
 public class PlayerController {
@@ -38,5 +39,10 @@ public class PlayerController {
     @GetMapping("/generateOrder")
     public ResponseEntity<ResponseStructure<?>> generateOrder(){
         return pService.generateOrder();
+    }
+
+    @GetMapping("/current-order")
+    public ResponseEntity<ResponseStructure<?>> getCurrentOrder() {
+        return pService.getCurrentOrder();
     }
 }

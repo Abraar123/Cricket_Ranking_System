@@ -27,7 +27,12 @@ public class PlayerService {
 
     private List<MatchResultRequest> player = new ArrayList<>();
 
+    private List<String> currentOrder = new ArrayList<>();
+
     public ResponseEntity<ResponseStructure<List<String>>> addPlayers(ShuffleRequest r) {
+        players.clear();
+        player.clear();
+        currentOrder.clear();
         players.addAll(r.getPlayers());
         ResponseStructure<List<String>> rs=new ResponseStructure<>();
         rs.setStatusCode(HttpStatus.CREATED.value());
@@ -53,6 +58,8 @@ public class PlayerService {
             shuffledPlayers.set(i,shuffledPlayers.get(j));
             shuffledPlayers.set(j,temp);
         }
+        currentOrder.clear();
+        currentOrder.addAll(shuffledPlayers);
         ShuffleResponse sr=new ShuffleResponse();
         sr.setShuffledPlayers(shuffledPlayers);
         rs.setStatusCode(HttpStatus.OK.value());
@@ -64,6 +71,7 @@ public class PlayerService {
     public ResponseEntity<ResponseStructure<?>> addMatchResult(
             List<MatchResultRequest> results){
 
+        player.clear();
         player.addAll(results);
 
         ResponseStructure<String> rs =
@@ -91,6 +99,12 @@ public class PlayerService {
             return Double.compare(score2, score1);
         });
 
+        currentOrder.clear();
+
+        for (MatchResultRequest p : player) {
+            currentOrder.add(p.getName());
+        }
+
         ResponseStructure<List<MatchResultRequest>> rs =
                 new ResponseStructure<>();
 
@@ -99,5 +113,20 @@ public class PlayerService {
         rs.setData(player);
 
         return new ResponseEntity<>(rs, HttpStatus.OK);
+    }
+
+    public ResponseEntity<ResponseStructure<?>> getCurrentOrder() {
+
+        ResponseStructure<List<String>> rs =
+                new ResponseStructure<>();
+
+        rs.setStatusCode(HttpStatus.OK.value());
+        rs.setMessage("Current Order");
+        rs.setData(currentOrder);
+
+        return new ResponseEntity<>(
+                rs,
+                HttpStatus.OK
+        );
     }
 }
