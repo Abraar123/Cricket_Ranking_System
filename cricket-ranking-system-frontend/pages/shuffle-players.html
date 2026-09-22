@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shuffle Players</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12181B;
+    --card: #1B2328;
+    --card-border: #29333A;
+    --accent: #E8823D;
+    --accent-dark: #4A2E17;
+    --accent-text: #F7C79A;
+    --text-primary: #F4F1EA;
+    --text-secondary: #8B9AA0;
+    --danger: #E2665C;
+    --danger-bg: #3A2222;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
+}
+
+.page-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+  .module {
+    width: 100%;
+    max-width: 480px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 28px 28px 24px;
+  }
+
+  h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 20px;
+    line-height: 1.5;
+  }
+
+  #shuffle-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #29160A;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: filter 0.15s ease, transform 0.1s ease;
+  }
+
+  #shuffle-btn:hover:not(:disabled) { filter: brightness(1.08); }
+  #shuffle-btn:active:not(:disabled) { transform: scale(0.98); }
+  #shuffle-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .dice { display: inline-block; }
+  #shuffle-btn.spinning .dice { animation: spin 0.6s linear infinite; }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .error-msg {
+    font-size: 13px;
+    color: var(--danger);
+    background: var(--danger-bg);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    margin: 14px 0 0;
+    display: none;
+  }
+
+  .error-msg.visible { display: block; }
+
+  #result {
+    background-color: var(--card);
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .empty-state {
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 22px 4px;
+    text-align: center;
+    border: 1px dashed var(--card-border);
+    border-radius: var(--radius-sm);
+    margin-top: 20px;
+  }
+
+  .player-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #171F23;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    opacity: 0;
+    transform: translateY(-4px);
+    animation: rowIn 0.25s ease forwards;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+
+  @keyframes rowIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .player-row.locked {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(232, 130, 61, 0.25);
+    animation: rowIn 0.25s ease forwards, settle 0.35s ease;
+  }
+
+  @keyframes settle {
+    0% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+
+  .jersey {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-dark);
+    color: var(--accent-text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .player-name {
+    font-size: 14.5px;
+    font-weight: 500;
+  }
+
+  .player-row.rolling .player-name {
+    color: var(--text-secondary);
+    filter: blur(0.3px);
+  }
+
+  #start-match-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+    box-sizing: border-box;
+    margin-top: 20px;
+    background: var(--accent);
+    color: #29160A;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: filter 0.15s ease, opacity 0.15s ease;
+  }
+
+  #start-match-btn:hover:not(.disabled) { filter: brightness(1.1); }
+
+  #start-match-btn.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  #start-match-btn {
+  display: none;
+  }
+</style>
+<link rel="stylesheet" href="navbar.css">
+</head>
+<body>
+<div id="navbar-container"></div>
+<div class="page-content">
+<div class="module">
+  <h2>Shuffle players</h2>
+  <p class="subtitle">Generate a random batting or turn order for today's match.</p>
+
+  <button id="shuffle-btn" type="button" onclick="shufflePlayers()">
+    <span class="dice">🎲</span>
+    <span id="shuffle-btn-label">Generate random order</span>
+  </button>
+
+  <p class="error-msg" id="error-msg"></p>
+
+  <ul id="result"></ul>
+
+  <a id="start-match-btn" class="disabled" href="./match-results.html">Start match</a>
+</div>
+</div>
+<script src="navbar.js"></script>
+<script>
+  var rollInterval = null;
+
+  function getRoster() {
+    try {
+      var roster = JSON.parse(localStorage.getItem('roster_players'));
+      return Array.isArray(roster) ? roster : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function showError(text) {
+    var errorMsg = document.getElementById('error-msg');
+    errorMsg.textContent = text;
+    errorMsg.classList.add('visible');
+  }
+
+  function clearError() {
+    var errorMsg = document.getElementById('error-msg');
+    errorMsg.textContent = '';
+    errorMsg.classList.remove('visible');
+  }
+
+  function buildRollingRows(count, namePool) {
+    var result = document.getElementById('result');
+    result.innerHTML = '';
+
+    for (var i = 0; i < count; i++) {
+      var row = document.createElement('li');
+      row.className = 'player-row rolling';
+      row.style.animationDelay = (i * 0.03) + 's';
+
+      var jersey = document.createElement('div');
+      jersey.className = 'jersey';
+      jersey.textContent = i + 1;
+
+      var name = document.createElement('div');
+      name.className = 'player-name';
+      name.textContent = namePool.length > 0
+        ? namePool[Math.floor(Math.random() * namePool.length)]
+        : '\u2014';
+
+      row.appendChild(jersey);
+      row.appendChild(name);
+      result.appendChild(row);
+    }
+  }
+
+  function startRolling(namePool) {
+    var rowCount = namePool.length > 0 ? namePool.length : 5;
+    buildRollingRows(rowCount, namePool);
+
+    if (namePool.length === 0) return;
+
+    rollInterval = setInterval(function () {
+      var rows = document.querySelectorAll('#result .player-row .player-name');
+      rows.forEach(function (nameEl) {
+        nameEl.textContent = namePool[Math.floor(Math.random() * namePool.length)];
+      });
+    }, 70);
+  }
+
+  function stopRolling() {
+    if (rollInterval) {
+      clearInterval(rollInterval);
+      rollInterval = null;
+    }
+  }
+
+  function settleFinalOrder(shuffledPlayers) {
+    var result = document.getElementById('result');
+    result.innerHTML = '';
+
+    if (!shuffledPlayers || shuffledPlayers.length === 0) {
+      var empty = document.createElement('li');
+      empty.className = 'empty-state';
+      empty.textContent = 'No players to shuffle yet. Add players first.';
+      result.appendChild(empty);
+      return;
+    }
+
+    shuffledPlayers.forEach(function (player, index) {
+      var row = document.createElement('li');
+      row.className = 'player-row';
+      row.style.animationDelay = (index * 0.03) + 's';
+
+      var jersey = document.createElement('div');
+      jersey.className = 'jersey';
+      jersey.textContent = index + 1;
+
+      var name = document.createElement('div');
+      name.className = 'player-name';
+      name.textContent = player;
+
+      row.appendChild(jersey);
+      row.appendChild(name);
+      result.appendChild(row);
+
+      setTimeout(function () {
+        row.classList.add('locked');
+      }, index * 130);
+    });
+
+    var startBtn = document.getElementById('start-match-btn');
+    setTimeout(function () {
+      startBtn.classList.remove('disabled');
+    }, shuffledPlayers.length * 130);
+  }
+
+  function renderPlayers(shuffledPlayers) {
+    var result = document.getElementById('result');
+    result.innerHTML = '';
+
+    if (!shuffledPlayers || shuffledPlayers.length === 0) return;
+
+    shuffledPlayers.forEach(function (player, index) {
+      var row = document.createElement('li');
+      row.className = 'player-row locked';
+      row.style.animationDelay = (index * 0.04) + 's';
+
+      var jersey = document.createElement('div');
+      jersey.className = 'jersey';
+      jersey.textContent = index + 1;
+
+      var name = document.createElement('div');
+      name.className = 'player-name';
+      name.textContent = player;
+
+      row.appendChild(jersey);
+      row.appendChild(name);
+      result.appendChild(row);
+    });
+
+    document.getElementById('start-match-btn').classList.remove('disabled');
+  }
+
+  function wait(ms) {
+    return new Promise(function (resolve) { setTimeout(resolve, ms); });
+  }
+
+  async function shufflePlayers() {
+    clearError();
+    document.getElementById("start-match-btn").style.display = "inline-block";
+
+    var btn = document.getElementById('shuffle-btn');
+    var label = document.getElementById('shuffle-btn-label');
+    btn.disabled = true;
+    btn.classList.add('spinning');
+    label.textContent = 'Shuffling...';
+    document.getElementById('start-match-btn').classList.add('disabled');
+
+    var roster = getRoster();
+    startRolling(roster);
+
+    try {
+      const [response] = await Promise.all([
+        fetch("http://localhost:8080/cric/shuffle"),
+        wait(1100) 
+      ]);
+
+      if (!response.ok) {
+        throw new Error('Server returned ' + response.status);
+      }
+
+      const data = await response.json();
+      const shuffledPlayers = data.data.shuffledPlayers;
+
+      stopRolling();
+      localStorage.setItem('shuffledPlayers', JSON.stringify(shuffledPlayers));
+      settleFinalOrder(shuffledPlayers);
+    } catch (err) {
+      stopRolling();
+      document.getElementById('result').innerHTML = '';
+      showError('Could not shuffle players. Check the connection and try again.');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('spinning');
+      label.textContent = 'Generate random order';
+    }
+  }
+
+  (function restoreFromStorage() {
+  try {
+    var stored = JSON.parse(localStorage.getItem('shuffledPlayers'));
+    var currentRoster = getRoster();
+
+    var isStale = !stored
+      || stored.length !== currentRoster.length
+      || !stored.every(function (name) { return currentRoster.indexOf(name) !== -1; });
+
+    if (isStale) {
+      localStorage.removeItem('shuffledPlayers');
+      return;
+    }
+
+    renderPlayers(stored);
+  } catch (e) { }
+})();
+</script>
+
+</body>
+</html>

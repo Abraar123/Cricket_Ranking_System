@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Match Results</title>
+<link rel="stylesheet" href="../css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12181B;
+    --card: #1B2328;
+    --card-border: #29333A;
+    --accent: #E8823D;
+    --accent-dark: #4A2E17;
+    --accent-text: #F7C79A;
+    --text-primary: #F4F1EA;
+    --text-secondary: #8B9AA0;
+    --danger: #E2665C;
+    --danger-bg: #3A2222;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-primary);
+}
+
+.page-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+  .module {
+    width: 100%;
+    max-width: 560px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 28px 28px 24px;
+  }
+
+  h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 20px;
+    line-height: 1.5;
+  }
+
+  .table-head {
+    display: grid;
+    grid-template-columns: 28px 1fr 88px 88px;
+    gap: 10px;
+    padding: 0 4px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .table-head span:nth-child(3),
+  .table-head span:nth-child(4) {
+    text-align: center;
+  }
+
+  #playerInputs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .player-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 88px 88px;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(-4px);
+    animation: rowIn 0.25s ease forwards;
+  }
+
+  @keyframes rowIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .jersey {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent-dark);
+    color: var(--accent-text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .player-row .player-name {
+    font-size: 14.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-row input {
+    width: 100%;
+    background: #0F1417;
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    text-align: center;
+    padding: 9px 6px;
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .player-row input::placeholder { color: var(--text-secondary); }
+
+  .player-row input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(232, 130, 61, 0.25);
+  }
+
+  .player-row input.field-error {
+    border-color: var(--danger);
+  }
+
+  .empty-state {
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 22px 4px;
+    text-align: center;
+    border: 1px dashed var(--card-border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
+  }
+
+  .empty-state a { color: var(--accent); }
+
+  .error-msg {
+    font-size: 13px;
+    color: var(--danger);
+    background: var(--danger-bg);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    margin: 0 0 14px;
+    display: none;
+  }
+
+  .error-msg.visible { display: block; }
+
+.button-group {
+  display: flex;
+  gap: 12px;     
+  width: 100%;   
+}
+
+.button-group button {
+  flex: 1;       
+  background: var(--accent);
+  color: #29160A;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.button-group button:hover:not(:disabled) { 
+  filter: brightness(1.08); 
+}
+
+.button-group button:active:not(:disabled) { 
+  transform: scale(0.98); 
+}
+
+.button-group button:disabled { 
+  opacity: 0.5; 
+  cursor: not-allowed; 
+}
+
+
+  #msg {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 16px 0 0;
+    min-height: 20px;
+  }
+
+  #msg:not(:empty) {
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(255,255,255,0.04);
+  }
+  #generate-ranking-btn {
+  display: none; 
+}
+
+</style>
+<link rel="stylesheet" href="navbar.css">
+</head>
+<body>
+<div id="navbar-container"></div>
+<div class="page-content">
+<div class="module">
+  <h2>Add match results</h2>
+  <p class="subtitle">Enter each player's runs and wickets for this match.</p>
+
+  <div class="table-head" id="table-head" style="display:none;">
+    <span></span>
+    <span>Player</span>
+    <span>Runs</span>
+    <span>Wickets</span>
+  </div>
+
+  <div id="playerInputs"></div>
+
+  <p class="error-msg" id="error-msg"></p>
+
+  <div class="button-group">
+    <button id="save-btn" type="button" onclick="saveResult()">Save result</button>
+    <button id="generate-ranking-btn" type="button" onclick="window.location.href='generate-order.html'">Generate Ranking</button>
+  </div>
+  <h3 id="msg"></h3>
+</div>
+</div>
+<script src="navbar.js"></script>
+<script>
+  function getShuffledPlayers() {
+    try {
+      var stored = JSON.parse(localStorage.getItem('shuffledPlayers'));
+      return Array.isArray(stored) ? stored : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  var players = [];
+
+async function loadPlayers() {
+
+    try {
+
+        const response = await fetch(
+            "http://localhost:8080/cric/current-order"
+        );
+
+        const data = await response.json();
+
+        players = data.data;
+
+        render();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showError("Unable to load players");
+
+    }
+}
+
+  function showError(text) {
+    var errorMsg = document.getElementById('error-msg');
+    errorMsg.textContent = text;
+    errorMsg.classList.add('visible');
+  }
+
+  function clearError() {
+    var errorMsg = document.getElementById('error-msg');
+    errorMsg.textContent = '';
+    errorMsg.classList.remove('visible');
+  }
+
+  function render() {
+    var container = document.getElementById('playerInputs');
+    var saveBtn = document.getElementById('save-btn');
+    container.innerHTML = '';
+
+    if (players.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = 'No shuffled player order found. Generate one on the <a href="./shuffle-players.html">Shuffle Players</a> page first.';
+      container.appendChild(empty);
+      saveBtn.disabled = true;
+      return;
+    }
+
+    document.getElementById('table-head').style.display = 'grid';
+
+    players.forEach(function (player, index) {
+      var row = document.createElement('div');
+      row.className = 'player-row';
+      row.style.animationDelay = (index * 0.03) + 's';
+
+      var jersey = document.createElement('div');
+      jersey.className = 'jersey';
+      jersey.textContent = index + 1;
+
+      var name = document.createElement('div');
+      name.className = 'player-name';
+      name.textContent = player;
+
+      var runsInput = document.createElement('input');
+      runsInput.type = 'number';
+      runsInput.min = '0';
+      runsInput.placeholder = '0';
+      runsInput.className = 'runs-input';
+      runsInput.dataset.index = index;
+
+      var wicketsInput = document.createElement('input');
+      wicketsInput.type = 'number';
+      wicketsInput.min = '0';
+      wicketsInput.max = '10';
+      wicketsInput.placeholder = '0';
+      wicketsInput.className = 'wickets-input';
+      wicketsInput.dataset.index = index;
+
+      row.appendChild(jersey);
+      row.appendChild(name);
+      row.appendChild(runsInput);
+      row.appendChild(wicketsInput);
+      container.appendChild(row);
+    });
+  }
+
+  function collectResults() {
+    var rows = document.querySelectorAll('#playerInputs .player-row');
+    var results = [];
+    var hasError = false;
+
+    rows.forEach(function (row, index) {
+      var runsInput = row.querySelector('.runs-input');
+      var wicketsInput = row.querySelector('.wickets-input');
+
+      runsInput.classList.remove('field-error');
+      wicketsInput.classList.remove('field-error');
+
+      var runsVal = runsInput.value.trim();
+      var wicketsVal = wicketsInput.value.trim();
+
+      if (runsVal === '') { runsInput.classList.add('field-error'); hasError = true; }
+      if (wicketsVal === '') { wicketsInput.classList.add('field-error'); hasError = true; }
+
+      results.push({
+        name: players[index],
+        runs: Number(runsVal || 0),
+        wickets: Number(wicketsVal || 0)
+      });
+    });
+
+    if (hasError) {
+      showError('Enter runs and wickets for every player before saving.');
+      return null;
+    }
+
+    return results;
+  }
+
+  async function saveResult() {
+    clearError();
+    document.getElementById("generate-ranking-btn").style.display = "inline-block";
+    document.getElementById('msg').innerHTML = '';
+
+    if (players.length === 0) {
+      showError('No players to save. Shuffle players first.');
+      return;
+    }
+
+    var results = collectResults();
+    if (results === null) return;
+
+    var saveBtn = document.getElementById('save-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    try {
+      const response = await fetch(
+        "http://localhost:8080/cric/result",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(results)
+        });
+
+      if (!response.ok) {
+        throw new Error('Server returned ' + response.status);
+      }
+
+      const data = await response.json();
+      document.getElementById('msg').innerHTML = data.message;
+    } catch (err) {
+      document.getElementById('msg').innerHTML = 'Could not save results. Check the connection and try again.';
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save result';
+    }
+  }
+
+loadPlayers();
+</script>
+
+</body>
+</html>
